@@ -1,13 +1,34 @@
-﻿#if UNITY_EDITOR
-
-using UnityEngine;
-using UnityEditor;
+﻿using UnityEngine;
 
 using System;
+using System.Collections.Generic;
+
+#if UNITY_EDITOR
+using UnityEditor;
+
 using System.Collections;
 using System.Reflection;
+#endif
 
 namespace Ferr {
+	public static class RuntimeLayerUtil {
+		static List<int> mReservedLayers = null;
+		
+		public static int  GetFreeLayer() {
+			for (int i = 16; i < 32; i += 1) {
+				if (LayerMask.LayerToName(i) == "" && (mReservedLayers == null || !mReservedLayers.Contains(i)))
+					return i;
+			}
+			Debug.LogError("Ferr is looking for an unnamed render layer after 15, but none are free!");
+			return -1;
+		}
+		public static void ReserveLayer(int aLayerID) {
+			if (mReservedLayers == null)
+				mReservedLayers = new List<int>();
+			mReservedLayers.Add(aLayerID);
+		}
+	}
+	#if UNITY_EDITOR
 	public static class LayerUtil {
 		static SerializedObject GetLayerManager() {
 			return new UnityEditor.SerializedObject(UnityEditor.AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset")[0]);
@@ -85,6 +106,5 @@ namespace Ferr {
 			return sortingLayerNames.GetValue(null, null) as string[];
 		}
 	}
+	#endif
 }
-
-#endif

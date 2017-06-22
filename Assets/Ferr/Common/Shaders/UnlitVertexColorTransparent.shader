@@ -38,7 +38,7 @@ Shader "Ferr/Common/Unlit Vertex Color Transparent" {
 
 			VS_OUT vert (appdata_ferr input) {
 				VS_OUT result;
-				result.position = mul (UNITY_MATRIX_MVP, input.position);
+				result.position = UnityObjectToClipPos (input.position);
 				result.color    = input.color;
 				#if USE_TEX
 				result.uv       = TRANSFORM_TEX (input.uv, _MainTex);

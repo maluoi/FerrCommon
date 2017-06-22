@@ -24,7 +24,6 @@ namespace Ferr {
 			}
             for (int i=0; i<aMovedFromAssetPaths.Length; i+=1) {
 				if (aMovedFromAssetPaths[i].EndsWith(".prefab")) {
-                    Debug.Log(aMovedFromAssetPaths[i]);
                 }
             }
 		}

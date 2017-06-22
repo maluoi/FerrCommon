@@ -215,35 +215,36 @@ namespace Ferr {
         #endregion
 
         #region Cap methods
-		public static void ImageCapBase(int aControlID, Vector3 aPosition, Quaternion aRotation, float aSize, Texture2D aTex)
-		{
-			if (Event.current.type != EventType.Repaint) {
-				return;
-			}
-
-			aPosition = Handles.matrix.MultiplyPoint(aPosition);
-			Vector3 right = Camera.current.transform.right * aSize;
-			Vector3 top   = Camera.current.transform.up    * aSize;
-			CapMaterial2D.mainTexture = aTex;
-			CapMaterial2D.SetPass(0);
+		public static void ImageCapBase(int aControlID, Vector3 aPosition, Quaternion aRotation, float aSize, Texture2D aTex, EventType aEvent) {
+            if (aEvent != EventType.Layout) { 
+                if (aEvent == EventType.Repaint) { 
+			        aPosition = Handles.matrix.MultiplyPoint(aPosition);
+			        Vector3 right = Camera.current.transform.right * aSize;
+			        Vector3 top   = Camera.current.transform.up    * aSize;
+			        CapMaterial2D.mainTexture = aTex;
+			        CapMaterial2D.SetPass(0);
 			
-			GL.Begin(GL.QUADS);
-			GL.Color(Handles.color);
-			GL.TexCoord2(1, 1);
-			GL.Vertex(aPosition + right + top);
+			        GL.Begin(GL.QUADS);
+			        GL.Color(Handles.color);
+			        GL.TexCoord2(1, 1);
+			        GL.Vertex(aPosition + right + top);
 			
-			GL.TexCoord2(1, 0);
-			GL.Vertex(aPosition + right - top);
+			        GL.TexCoord2(1, 0);
+			        GL.Vertex(aPosition + right - top);
 			
-			GL.TexCoord2(0, 0);
-			GL.Vertex(aPosition - right - top);
+			        GL.TexCoord2(0, 0);
+			        GL.Vertex(aPosition - right - top);
 			
-			GL.TexCoord2(0, 1);
-			GL.Vertex(aPosition - right + top);
+			        GL.TexCoord2(0, 1);
+			        GL.Vertex(aPosition - right + top);
 			
-			GL.End();
+			        GL.End();
+                }
+            } else {
+                HandleUtility.AddControl(aControlID, HandleUtility.DistanceToRectangle(aPosition, aRotation, aSize));
+            }
 		}
-		public static void CubeCapDirBase(int aControlID, Vector3 aPosition, Quaternion aRotation, float aSize, Vector3 aScale) {
+        public static void CubeCapDirBase(int aControlID, Vector3 aPosition, Quaternion aRotation, float aSize, Vector3 aScale) {
 			if (Event.current.type != EventType.Repaint) {
 				return;
 			}

@@ -27,7 +27,7 @@ Shader "Ferr/Common/Unlit Solid Color Transparent" {
 
 			VS_OUT vert (appdata_ferr input) {
 				VS_OUT result;
-				result.position = mul (UNITY_MATRIX_MVP, input.vertex);
+				result.position = UnityObjectToClipPos (input.vertex);
 				return result;
 			}
 

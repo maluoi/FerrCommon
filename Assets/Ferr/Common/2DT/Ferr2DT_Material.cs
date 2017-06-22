@@ -134,9 +134,9 @@ public class Ferr2DT_Material : ScriptableObject, IFerr2DTMaterial {
     #endregion
 	
 	#if UNITY_EDITOR
-	const string editorMenuName = "Ferr2D Terrain Material";
-	[UnityEditor.MenuItem("GameObject/Create " + editorMenuName, false, 11 ), 
-	 UnityEditor.MenuItem("Assets/Create/"     + editorMenuName, false, 101)]
+	const string editorMenuName = "Terrain Material";
+	[UnityEditor.MenuItem("GameObject/Create Ferr2D Terrain/" + editorMenuName, false, 11 ), 
+	 UnityEditor.MenuItem("Assets/Create/Ferr2D Terrain/"     + editorMenuName, false, 101)]
 	public static void CreateAsset() {
 		Ferr.SOUtil.CreateAsset(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType, editorMenuName);
 	}

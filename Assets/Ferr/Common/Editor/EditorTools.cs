@@ -191,6 +191,32 @@ namespace Ferr {
 			GL.End();
 			GL.PopMatrix();
 		}
+		public static void DrawPolyLine(Vector3[] aPts, float aWidth) {
+			if (Event.current.type != EventType.Repaint) {
+				return;
+			}
+			CapMaterial2D.mainTexture = EditorGUIUtility.whiteTexture;
+			CapMaterial2D.SetPass(0);
+			
+			GL.PushMatrix();
+			GL.MultMatrix(Handles.matrix);
+			GL.Begin(GL.TRIANGLES);
+			GL.Color(Handles.color);
+			for (int i = 1; i < aPts.Length; i++) {
+				Vector3 norm = (aPts[i] - aPts[i-1]).normalized;
+				norm = new Vector3(-norm.y, norm.x, norm.z) * HandleUtility.GetHandleSize(aPts[i]) * aWidth;
+				
+				GL.Vertex(aPts[i-1] - norm);
+				GL.Vertex(aPts[i-1] + norm);
+				GL.Vertex(aPts[i] + norm);
+				
+				GL.Vertex(aPts[i] + norm);
+				GL.Vertex(aPts[i] - norm);
+				GL.Vertex(aPts[i-1] - norm);
+			}
+			GL.End();
+			GL.PopMatrix();
+		}
         public static void Box      (int aBorder, System.Action inside) {
             Box(aBorder, inside, 0, 0);
         }

@@ -1,31 +1,30 @@
-﻿using Ferr;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class RestoreMesh : MonoBehaviour {
-	[SerializeField] Mesh _originalMesh;
+namespace Ferr { 
+	public class RestoreMesh : MonoBehaviour {
+		[SerializeField] Mesh _originalMesh;
 
-	public Mesh OriginalMesh { get { return _originalMesh; } set { _originalMesh = value; } }
+		public Mesh OriginalMesh { get { return _originalMesh; } set { _originalMesh = value; } }
 
-	public void Restore(bool aMaintainColors = true) {
-		MeshFilter filter = GetComponent<MeshFilter>();
-		if (filter == null) {
-			Debug.LogError("No mesh filter to restore to!", gameObject);
-			return;
-		}
+		public void Restore(bool aMaintainColors = true) {
+			MeshFilter filter = GetComponent<MeshFilter>();
+			if (filter == null) {
+				Debug.LogError("No mesh filter to restore to!", gameObject);
+				return;
+			}
 		
-		RecolorTree recolor = null;
-		if (aMaintainColors) {
-			recolor = new RecolorTree(filter.sharedMesh);
-		}
+			RecolorTree recolor = null;
+			if (aMaintainColors) {
+				recolor = new RecolorTree(filter.sharedMesh);
+			}
 
-		filter.sharedMesh = _originalMesh;
+			filter.sharedMesh = _originalMesh;
 
-		if (aMaintainColors) {
-			ProceduralMeshUtil.EnsureProceduralMesh(filter);
-			Mesh m = filter.sharedMesh;
-			recolor.Recolor(ref m);
+			if (aMaintainColors) {
+				ProceduralMeshUtil.EnsureProceduralMesh(filter);
+				Mesh m = filter.sharedMesh;
+				recolor.Recolor(ref m);
+			}
 		}
 	}
 }

@@ -5,7 +5,7 @@ using System.IO;
 namespace Ferr {
 	class ProceduralMeshSaver : AssetPostprocessor {
         #region Fields
-        const string procMeshPrefix = "FerrProcMesh_";
+        
         #endregion
 
         #region Unity Events
@@ -34,7 +34,7 @@ namespace Ferr {
 			aMesh.Build(true);
 			Mesh m = aMesh.MeshData;
 			
-			if (m.name.Contains(procMeshPrefix)) {
+			if (m.name.Contains(ProceduralMeshUtil.cProcMeshPrefix)) {
 				return;
 			}
 			
@@ -57,7 +57,7 @@ namespace Ferr {
 			
 			// climb the parent/child tree
 			while (curr != null) { name = curr.name + "." + name; curr = curr.transform.parent; }
-			name = procMeshPrefix + name;
+			name = ProceduralMeshUtil.cProcMeshPrefix + name;
 			
 			// make sure the path folder exists
 			if (!Directory.Exists(path)) {

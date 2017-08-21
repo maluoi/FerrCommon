@@ -13,88 +13,131 @@ namespace Ferr {
 	}
 	
 	public class DataStringWriterUtil {
-		DataStringType _type;
-		StringBuilder  _builder;
-		char           _separator;
+		DataStringType  _type;
+		StringBuilder   _builder;
+		HashSet<string> _names = new HashSet<string>();
 
-		public DataStringWriterUtil(DataStringType aType, char aSeparator='|') {
+		public DataStringWriterUtil(DataStringType aType) {
 			_type      = aType;
-			_separator = aSeparator;
 			_builder   = new StringBuilder();
+			_builder.Append('{');
 		}
 
 		public void Int(int aData) {
-			String(aData.ToString());
+			Entry(aData.ToString());
 		}
 		public void Int(string aName, int aData) {
-			String(aName, aData.ToString());
+			Entry(aName, aData.ToString());
+		}
+		public void Long(long aData) {
+			Entry(aData.ToString());
+		}
+		public void Long(string aName, long aData) {
+			Entry(aName, aData.ToString());
 		}
 		public void Bool(bool aData) {
-			String(aData.ToString());
+			Entry(aData.ToString());
 		}
 		public void Bool(string aName, bool aData) {
-			String(aName, aData.ToString());
+			Entry(aName, aData.ToString());
 		}
 		public void Float(float aData) {
-			String(aData.ToString());
+			Entry(aData.ToString());
 		}
 		public void Float(string aName, float aData) {
-			String(aName, aData.ToString());
+			Entry(aName, aData.ToString());
 		}
 		public void Data(IToFromDataString aData) {
 			if (aData == null)
-				String("null");
+				Entry("null");
 			else
-				String(aData.GetType().Name+":"+aData.ToDataString());
+				Entry(aData.GetType().Name+"="+aData.ToDataString());
 		}
 		public void Data(string aName, IToFromDataString aData) {
 			if (aData == null)
-				String(aName, "null");
+				Entry(aName, "null");
 			else
-				String(aName, aData.GetType().Name+":"+aData.ToDataString());
+				Entry(aName, aData.GetType().Name+"="+aData.ToDataString());
 		}
 		public void String(string aData) {
-			if (_type == DataStringType.Named)
-				throw new System.Exception("Need a name for a named list!");
-
-			if (_builder.Length > 0)
-				_builder.Append(_separator);
-			_builder.Append(aData);
+			char quotes = GetQuoteType(aData);
+			if (quotes != ' ') {
+				Entry(quotes+aData+quotes);
+			} else {
+				Entry(aData);
+			}
 		}
 		public void String(string aName, string aData) {
-			if (_type == DataStringType.Ordered)
-				throw new System.Exception("Name doesn't apply for ordered lists!");
+			char quotes = GetQuoteType(aData);
+			if (quotes != ' ') {
+				Entry(aName, quotes+aData+quotes);
+			} else {
+				Entry(aName, aData);
+			}
+		}
+		protected char GetQuoteType(string aData) {
+			char result = ' ';
+			if (!aData.StartsWith("{") && !aData.StartsWith("\"") && !aData.StartsWith("'")) {
+				bool sq = aData.Contains("'");
+				bool dq = aData.Contains("\"");
+				if (sq && dq)
+					throw new ArgumentException("String data contains -both- single and double quotes, what am I supposed to do with this?");
 
-			if (_builder.Length > 0)
-				_builder.Append(_separator);
-			_builder.Append(aName.Replace("=", "&eq;"));
-			_builder.Append("=");
+				result = sq ? '"' : '\'';
+			}
+			return result;
+		}
+		protected void Entry(string aData) {
+			if (_type == DataStringType.Named)
+				throw new Exception("Need a name for a named list!");
+
+			if (_builder.Length > 1)
+				_builder.Append(',');
+			_builder.Append(aData);
+		}
+		protected void Entry(string aName, string aData) {
+			if (_type == DataStringType.Ordered)
+				throw new Exception("Name doesn't apply for ordered lists!");
+			if (aName.Contains(":") || aName.Contains(","))
+				throw new Exception("Name includes a reserved character! (: or ,) - " + aName);
+			if (_names.Contains(aName))
+				throw new Exception("Used the same name twice: " + aName);
+			_names.Add(aName);
+
+			if (_builder.Length > 1)
+				_builder.Append(',');
+			_builder.Append(aName);
+			_builder.Append(":");
 			_builder.Append(aData);
 		}
 
 		public override string ToString() {
-			return _builder.ToString();
+			return _builder.ToString()+"}";
 		}
 	}
 
 	public class DataStringReaderUtil {
 		DataStringType _type;
-		char           _separator;
 		string[]       _words;
 		string[]       _names;
 		int            _curr = 0;
 
-		public int NameCount { get { return _names.Length; } }
+		public int  NameCount { get { return _names.Length; } }
+		public bool HasNext   { get { return _curr < _words.Length; } }
 
-		public DataStringReaderUtil(string aData, DataStringType aType, char aSeparator = '|') {
+		public DataStringReaderUtil(string aData, DataStringType aType) {
+			List<string> words = DataStringUtil.SplitSmart(aData, ',');
+			if (words == null)
+				throw new ArgumentException("Poorly formed data string! Ensure sure quotes and brackets all match!");
+
 			_type  = aType;
-			_words = aData.Split(aSeparator);
+			_words = string.IsNullOrEmpty(aData) ? new string[] { } : words.ToArray();
 			
 			if (_type == DataStringType.Named) {
 				_names = new string[_words.Length];
 
 				for (int i = 0; i < _words.Length; i++) {
-					int    sep  = _words[i].IndexOf('=');
+					int    sep  = _words[i].IndexOf(':');
 					string name = _words[i].Substring(0, sep);
 					string data = _words[i].Substring(sep+1);
 
@@ -113,6 +156,12 @@ namespace Ferr {
 		}
 		public int Int(string aName) {
 			return int.Parse(Read(aName));
+		}
+		public long Long() {
+			return long.Parse(Read());
+		}
+		public long Long(string aName) {
+			return long.Parse(Read(aName));
 		}
 		public bool Bool() {
 			return bool.Parse(Read());
@@ -138,24 +187,31 @@ namespace Ferr {
 		public object Data(string aName) {
 			return CreateObject(Read(aName));
 		}
+		public void Data(ref IToFromDataString aBaseObject) {
+			string dataString = Read();
+			string data = dataString.Substring(dataString.IndexOf('=')+1);
+			aBaseObject.FromDataString(data);
+		}
+		public void Data(string aName, ref IToFromDataString aBaseObject) {
+			string dataString = Read(aName);
+			string data = dataString.Substring(dataString.IndexOf('=')+1);
+			aBaseObject.FromDataString(data);
+		}
 
 		private string Read(string aName) {
 			if (_type == DataStringType.Ordered)
-				throw new System.Exception("Can't do a named read from an ordered list!");
-
-			aName = aName.Replace("=", "&eq;");
-
+				throw new Exception("Can't do a named read from an ordered list!");
 			int index = Array.IndexOf(_names, aName);
 			if (index == -1)
-				throw new System.Exception("Can't find data from given name!");
+				throw new Exception("Can't find data from given name: " + aName);
 
 			return _words[index];
 		}
 		private string Read() {
 			if (_type == DataStringType.Named)
-				throw new System.Exception("Can't do an ordered read from a named list!");
+				throw new Exception("Can't do an ordered read from a named list!");
 			if (_curr >= _words.Length)
-				throw new System.Exception("Reading past the end of an ordered data string!");
+				throw new Exception("Reading past the end of an ordered data string!");
 
 			string result = _words[_curr];
 			_curr += 1;
@@ -164,10 +220,10 @@ namespace Ferr {
 		}
 
 		private object CreateObject(string aDataString) {
-			if (aDataString == null)
+			if (string.IsNullOrEmpty(aDataString) || aDataString == "null")
 				return null;
 
-			int    sep      = aDataString.IndexOf(':');
+			int    sep      = aDataString.IndexOf('=');
 			string typeName = aDataString.Substring(0, sep);
 			string data     = aDataString.Substring(sep+1);
 			Type t = Type.GetType(typeName);
@@ -225,6 +281,45 @@ namespace Ferr {
 				}
 			}
 			return aData;
+		}
+
+		public static List<string> SplitSmart(string aData, char aSeparator) {
+			List<string> result = new List<string>();
+			string curr       = "";
+			char   waitingFor = ' ';
+			int    waitCount  = 0;
+			string data       = aData.Trim();
+			if (data.StartsWith("{"))
+				data = data.Substring(1, data.Length-2);
+
+			for (int i = 0; i < data.Length; i++) {
+				char c = data[i];
+
+				if (waitingFor == ' ') {
+					if (c == aSeparator) {
+						result.Add(curr);
+						curr = "";
+						continue;
+					}
+					else if (c == '{' ) waitingFor = '}';
+					else if (c == '"' ) waitingFor = '"';
+					else if (c == '\'') waitingFor = '\'';
+				} else if (c == waitingFor) {
+					if (waitCount == 0)
+						waitingFor = ' ';
+					else
+						waitCount -= 1;
+				} else if (c == '{') {
+					waitCount += 1;
+				}
+
+				curr += c;
+			}
+			if (curr.Length > 0)
+				result.Add(curr);
+			if (waitingFor != ' ')
+				return null;
+			return result;
 		}
 	}
 }

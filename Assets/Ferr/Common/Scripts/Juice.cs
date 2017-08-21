@@ -164,7 +164,7 @@ namespace Ferr {
 		}
 		public static AnimationCurve LateFalloff {
 			get {
-				return new AnimationCurve(new Keyframe(0, 0), new Keyframe(0.75f, 0.0f), new Keyframe(1, 1));
+				return new AnimationCurve(new Keyframe(0, 0), new Keyframe(0.75f, 0.25f), new Keyframe(1, 1));
 			}
 		}
 		public static AnimationCurve Wobble {

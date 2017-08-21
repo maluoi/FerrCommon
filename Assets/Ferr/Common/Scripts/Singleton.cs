@@ -21,9 +21,11 @@ namespace Ferr {
 				_instance = GameObject.FindObjectOfType<T>() as T;
 				// if it's still null, see if we can instantiate it from the resources folder!
 				if (_instance == null) {
-					T obj = Resources.Load("Singletons/" + typeof(T).Name) as T;
-					if (obj != null)
-						_instance = Object.Instantiate<T>(obj);
+					GameObject obj = Resources.Load("Singletons/" + typeof(T).Name) as GameObject;
+					if (obj != null) {
+						GameObject go = GameObject.Instantiate(obj);
+						_instance = go.GetComponent<T>();
+					}
 				}
 				// and if there was no prefab, lets just try a plain create and go!
 				if (_instance == null) {

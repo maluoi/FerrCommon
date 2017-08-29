@@ -289,9 +289,34 @@ namespace Ferr {
 	    public static bool    HandlesMoving() {
 	        return selectedHandle != -1;
 	    }
-        #endregion
+		#endregion
 
-        #region Cap methods
+		#region Cap methods
+		public static void CircleCapBase(int aControlID, Vector3 aPosition, Quaternion aRotation, float aSize, EventType aEvent) {
+			if (aEvent == EventType.Repaint) {
+				aPosition = Handles.matrix.MultiplyPoint(aPosition);
+				Vector3 right = Camera.current.transform.right * aSize;
+				Vector3 up    = Camera.current.transform.up    * aSize;
+				CapMaterial2D.mainTexture = null;
+				CapMaterial2D.SetPass(0);
+
+				GL.Begin(GL.TRIANGLES);
+				GL.Color(Handles.color);
+
+				int     count = 6;
+				float   step  = 1f/count * Mathf.PI*2;
+				Vector3 start = aPosition + right;
+				for (int i = 1; i < count; i++) {
+					float p = i*step;
+					GL.Vertex(start);
+					GL.Vertex(aPosition + Mathf.Cos(p+step) * right + Mathf.Sin(p+step) * up);
+					GL.Vertex(aPosition + Mathf.Cos(p) * right + Mathf.Sin(p) * up);
+				}
+				GL.End();
+			} else if (aEvent == EventType.Layout) {
+				HandleUtility.AddControl(aControlID, HandleUtility.DistanceToRectangle(aPosition, aRotation, aSize));
+			}
+		}
 		public static void ImageCapBase(int aControlID, Vector3 aPosition, Quaternion aRotation, float aSize, Texture2D aTex, EventType aEvent) {
             if (aEvent != EventType.Layout) { 
                 if (aEvent == EventType.Repaint) { 

@@ -3,22 +3,34 @@ using System.Collections.Generic;
 
 namespace Ferr {
 	public interface IBlendPaintType {
-		string Name { get; }
-		
-		Color PaintColor    { get; set; }
-		float PaintSize     { get; set; }
-		float PaintStrength { get; set; }
-		float PaintFalloff  { get; set; }
-		bool  PaintBackfaces{ get; set; }
-		
-		void  StartPainting     (List<GameObject> aPaintObjs);
-		void  EndPainting       (List<GameObject> aPaintObjs);
-		
-		bool  IsValidPaintObject(GameObject aPaintObj);
-		float TypeAffinity      (GameObject aPaintObj);
-		void  DoPaint           (GameObject aPaintObj, RaycastHit aRayHit, Vector3 aPrevHitPt, Vector3 aHitPt);
-		void  SavePaintObject   (GameObject aPaintObj);
-		void  OnGUI             (ref LayoutAdvancer aLayout, float aWidth, float aHeight);
-		bool  OnInput           ();
+		Color Color    { get; set; }
+		float Size     { get; set; }
+		float Strength { get; set; }
+		float Falloff  { get; set; }
+		bool  Backfaces{ get; set; }
+
+		Texture2D Cursor            { get; }
+		Vector2   CursorHotspot     { get; }
+		bool      ShowColorSettings { get; }
+		bool      ShowBrushSettings { get; }
+		string    Name              { get; }
+
+		void PaintObjectsBegin(List<GameObject> aObjects, RaycastHit aHit, RaycastHit? aPreviousHit);
+		void PaintObjects     (List<GameObject> aObjects, RaycastHit aHit, RaycastHit? aPreviousHit);
+		void PaintObjectsEnd  (List<GameObject> aObjects, RaycastHit aHit, RaycastHit? aPreviousHit);
+
+		void PaintBegin(GameObject aObject, RaycastHit aHit, RaycastHit? aPreviousHit);
+		void Paint     (GameObject aObject, RaycastHit aHit, RaycastHit? aPreviousHit);
+		void PaintEnd  (GameObject aObject, RaycastHit aHit, RaycastHit? aPreviousHit);
+
+		float GetPointInfluence(Vector3 aObjScale, Vector3 aHitPt, Vector3 aHitDirection, Vector3 aVert, Vector3 aVertNormal);
+		void RenderScenePreview(Camera aSceneCamera, RaycastHit aHit, List<GameObject> aObjects);
+		void RenderScenePreview(Camera aSceneCamera, RaycastHit aHit, GameObject aObject);
+
+		int  CheckPriority(GameObject aOfObject);
+		void OnSelect  (List<GameObject> aObjects);
+		void OnUnselect(List<GameObject> aObjects);
+		void DrawToolGUI();
+		bool GUIInput   ();
 	}
 }

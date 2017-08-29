@@ -9,11 +9,16 @@ namespace Ferr {
 
 				if (aCreateRestoreComponent) {
 					RestoreMesh restore = aFilter.GetComponent<RestoreMesh>();
-					if (restore == null)
-						restore = aFilter.gameObject.AddComponent<RestoreMesh>();
+					if (restore == null) {
+						#if UNITY_EDITOR
+							restore = UnityEditor.Undo.AddComponent<RestoreMesh>(aFilter.gameObject);
+						#else
+							restore = aFilter.gameObject.AddComponent<RestoreMesh>();
+						#endif
+					}
 					restore.OriginalMesh = aFilter.sharedMesh;
 				}
-
+				
 				aFilter.sharedMesh = Object.Instantiate(aFilter.sharedMesh);
 				aFilter.sharedMesh.name = MakeInstName(aFilter);
 			} else if (!IsCorrectName(aFilter)) {

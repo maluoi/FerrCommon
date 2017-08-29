@@ -62,6 +62,19 @@ public class EditInIsolation : MonoBehaviour {
 			Selection.objects = result.ToArray();
 		} 
 	}
+	static EditInIsolation HasIsolationScene() {
+		EditInIsolation edit = null;
+
+		// find the isolation scene
+		for (int i = 0; i < EditorSceneManager.sceneCount; i++) {
+			Scene scene = EditorSceneManager.GetSceneAt(i);
+			GameObject[] roots = scene.GetRootGameObjects();
+			edit = GetFrom(roots);
+			if (edit != null)
+				break;
+		}
+		return edit;
+	}
 	static Scene GetIsolationScene() {
 		EditInIsolation edit = null;
 		Scene           result = default(Scene);
@@ -90,8 +103,11 @@ public class EditInIsolation : MonoBehaviour {
 		return result;
 	}
 	public static void DisableObjects() {
-		GameObject[]    objs = GetIsolationScene().GetRootGameObjects();
-		EditInIsolation edit = GetFrom(objs);
+		EditInIsolation edit = HasIsolationScene();
+		if (edit == null)
+			return;
+
+		GameObject[] objs = GetIsolationScene().GetRootGameObjects();
 		edit._wasEnabled = new bool[objs.Length];
 
 		// disable all objects, but track their previous states in an object that will serialize/maintain the data
@@ -101,8 +117,11 @@ public class EditInIsolation : MonoBehaviour {
 		}
 	}
 	public static void EnableObjects() {
-		GameObject[]    objs = GetIsolationScene().GetRootGameObjects();
-		EditInIsolation edit = GetFrom(objs);
+		EditInIsolation edit = HasIsolationScene();
+		if (edit == null)
+			return;
+
+		GameObject[] objs = GetIsolationScene().GetRootGameObjects();
 
 		// restore previous state
 		for (int i = 0; i < objs.Length; i++) {

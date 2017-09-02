@@ -191,6 +191,52 @@ namespace Ferr {
 			GL.End();
 			GL.PopMatrix();
 		}
+		public static void DrawLine(Vector3 aP1, Vector3 aP2, float aWidth) {
+			if (Event.current.type != EventType.Repaint) {
+				return;
+			}
+			CapMaterial2D.mainTexture = EditorGUIUtility.whiteTexture;
+			CapMaterial2D.SetPass(0);
+
+			GL.PushMatrix();
+			GL.MultMatrix(Handles.matrix);
+			GL.Begin(GL.TRIANGLES);
+			GL.Color(Handles.color);
+			Vector3 norm = (aP2 - aP1).normalized;
+			norm = new Vector3(-norm.y, norm.x, norm.z) * HandleUtility.GetHandleSize(aP2) * aWidth;
+
+			GL.Vertex(aP1 - norm);
+			GL.Vertex(aP1 + norm);
+			GL.Vertex(aP2 + norm);
+
+			GL.Vertex(aP2 + norm);
+			GL.Vertex(aP2 - norm);
+			GL.Vertex(aP1 - norm);
+			GL.End();
+			GL.PopMatrix();
+		}
+		public static void DrawDashedLine(Vector3 aP1, Vector3 aP2, float aWidth) {
+			if (Event.current.type != EventType.Repaint) {
+				return;
+			}
+			const float ratio = 20;
+			const float gapRatio = 10;
+
+			float size = ratio * aWidth;
+			float linePercent = ((ratio-gapRatio)/ratio);
+			float dist = Vector3.Distance(aP1, aP2);
+			int   segs = (int)(dist / size);
+
+			Vector3 curr = aP1;
+			Vector3 step = (aP2 - aP1).normalized * size;
+			for (int i = 0; i < segs; i++) {
+				DrawLine(curr, curr+ step * linePercent, aWidth);
+				curr += step;
+			}
+
+			float remaining = Mathf.Min(Vector3.Distance(aP2, curr), linePercent * size);
+			DrawLine(curr, curr+remaining*step.normalized, aWidth);
+		}
 		public static void DrawPolyLine(Vector3[] aPts, float aWidth) {
 			if (Event.current.type != EventType.Repaint) {
 				return;

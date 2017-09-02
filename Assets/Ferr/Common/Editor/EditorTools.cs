@@ -146,8 +146,8 @@ namespace Ferr {
         public static Material  GetDefaultMaterial () {
 			System.Reflection.BindingFlags bfs                            = System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static;
 	        System.Reflection.MethodInfo   getBuiltinExtraResourcesMethod = typeof( EditorGUIUtility ).GetMethod( "GetBuiltinExtraResource", bfs );
-	        #if UNITY_5
-	        string matName = "Default-Material.mat";
+			#if UNITY_5_3_OR_NEWER
+			string matName = "Default-Material.mat";
 	        #else
 	        string matName = "Default-Diffuse.mat";
 	        #endif
@@ -346,202 +346,194 @@ namespace Ferr {
                 HandleUtility.AddControl(aControlID, HandleUtility.DistanceToRectangle(aPosition, aRotation, aSize));
             }
 		}
-        public static void CubeCapDirBase(int aControlID, Vector3 aPosition, Quaternion aRotation, float aSize, Vector3 aScale) {
-			if (Event.current.type != EventType.Repaint) {
-				return;
-			}
-
-			aPosition  = Handles.matrix.MultiplyPoint(aPosition);
+        public static void CubeCapDirBase(int aControlID, Vector3 aPosition, Quaternion aRotation, float aSize, Vector3 aScale, EventType aEvent) {
+			if (aEvent == EventType.Repaint) {
+				aPosition  = Handles.matrix.MultiplyPoint(aPosition);
 			
-			for (int i = 0; i < CapMaterial3D.passCount; ++i) {
-				CapMaterial3D.SetPass(i);
+				for (int i = 0; i < CapMaterial3D.passCount; ++i) {
+					CapMaterial3D.SetPass(i);
 				
-				GL.PushMatrix();
-				GL.Begin(GL.QUADS);
-				GL.Color(Handles.color);
+					GL.PushMatrix();
+					GL.Begin(GL.QUADS);
+					GL.Color(Handles.color);
 				
-				GL.Vertex(aPosition + capDir.MultiplyPoint(Vector3.Scale(new Vector3(-1, 1,-1) * aSize, aScale)));
-				GL.Vertex(aPosition + capDir.MultiplyPoint(Vector3.Scale(new Vector3( 1, 1,-1) * aSize, aScale)));
-				GL.Vertex(aPosition + capDir.MultiplyPoint(Vector3.Scale(new Vector3( 1,-1,-1) * aSize, aScale)));
-				GL.Vertex(aPosition + capDir.MultiplyPoint(Vector3.Scale(new Vector3(-1,-1,-1) * aSize, aScale)));
+					GL.Vertex(aPosition + capDir.MultiplyPoint(Vector3.Scale(new Vector3(-1, 1,-1) * aSize, aScale)));
+					GL.Vertex(aPosition + capDir.MultiplyPoint(Vector3.Scale(new Vector3( 1, 1,-1) * aSize, aScale)));
+					GL.Vertex(aPosition + capDir.MultiplyPoint(Vector3.Scale(new Vector3( 1,-1,-1) * aSize, aScale)));
+					GL.Vertex(aPosition + capDir.MultiplyPoint(Vector3.Scale(new Vector3(-1,-1,-1) * aSize, aScale)));
 				
-				GL.Vertex(aPosition + capDir.MultiplyPoint(Vector3.Scale(new Vector3(-1,-1, 1) * aSize, aScale)));
-				GL.Vertex(aPosition + capDir.MultiplyPoint(Vector3.Scale(new Vector3( 1,-1, 1) * aSize, aScale)));
-				GL.Vertex(aPosition + capDir.MultiplyPoint(Vector3.Scale(new Vector3( 1, 1, 1) * aSize, aScale)));
-				GL.Vertex(aPosition + capDir.MultiplyPoint(Vector3.Scale(new Vector3(-1, 1, 1) * aSize, aScale)));
+					GL.Vertex(aPosition + capDir.MultiplyPoint(Vector3.Scale(new Vector3(-1,-1, 1) * aSize, aScale)));
+					GL.Vertex(aPosition + capDir.MultiplyPoint(Vector3.Scale(new Vector3( 1,-1, 1) * aSize, aScale)));
+					GL.Vertex(aPosition + capDir.MultiplyPoint(Vector3.Scale(new Vector3( 1, 1, 1) * aSize, aScale)));
+					GL.Vertex(aPosition + capDir.MultiplyPoint(Vector3.Scale(new Vector3(-1, 1, 1) * aSize, aScale)));
 				
-				GL.Vertex(aPosition + capDir.MultiplyPoint(Vector3.Scale(new Vector3(-1,-1,-1) * aSize, aScale)));
-				GL.Vertex(aPosition + capDir.MultiplyPoint(Vector3.Scale(new Vector3( 1,-1,-1) * aSize, aScale)));
-				GL.Vertex(aPosition + capDir.MultiplyPoint(Vector3.Scale(new Vector3( 1,-1, 1) * aSize, aScale)));
-				GL.Vertex(aPosition + capDir.MultiplyPoint(Vector3.Scale(new Vector3(-1,-1, 1) * aSize, aScale)));
+					GL.Vertex(aPosition + capDir.MultiplyPoint(Vector3.Scale(new Vector3(-1,-1,-1) * aSize, aScale)));
+					GL.Vertex(aPosition + capDir.MultiplyPoint(Vector3.Scale(new Vector3( 1,-1,-1) * aSize, aScale)));
+					GL.Vertex(aPosition + capDir.MultiplyPoint(Vector3.Scale(new Vector3( 1,-1, 1) * aSize, aScale)));
+					GL.Vertex(aPosition + capDir.MultiplyPoint(Vector3.Scale(new Vector3(-1,-1, 1) * aSize, aScale)));
 				
-				GL.Vertex(aPosition + capDir.MultiplyPoint(Vector3.Scale(new Vector3(-1, 1, 1) * aSize, aScale)));
-				GL.Vertex(aPosition + capDir.MultiplyPoint(Vector3.Scale(new Vector3( 1, 1, 1) * aSize, aScale)));
-				GL.Vertex(aPosition + capDir.MultiplyPoint(Vector3.Scale(new Vector3( 1, 1,-1) * aSize, aScale)));
-				GL.Vertex(aPosition + capDir.MultiplyPoint(Vector3.Scale(new Vector3(-1, 1,-1) * aSize, aScale)));
+					GL.Vertex(aPosition + capDir.MultiplyPoint(Vector3.Scale(new Vector3(-1, 1, 1) * aSize, aScale)));
+					GL.Vertex(aPosition + capDir.MultiplyPoint(Vector3.Scale(new Vector3( 1, 1, 1) * aSize, aScale)));
+					GL.Vertex(aPosition + capDir.MultiplyPoint(Vector3.Scale(new Vector3( 1, 1,-1) * aSize, aScale)));
+					GL.Vertex(aPosition + capDir.MultiplyPoint(Vector3.Scale(new Vector3(-1, 1,-1) * aSize, aScale)));
 				
-				GL.Vertex(aPosition + capDir.MultiplyPoint(Vector3.Scale(new Vector3(-1,-1, 1) * aSize, aScale)));
-				GL.Vertex(aPosition + capDir.MultiplyPoint(Vector3.Scale(new Vector3(-1, 1, 1) * aSize, aScale)));
-				GL.Vertex(aPosition + capDir.MultiplyPoint(Vector3.Scale(new Vector3(-1, 1,-1) * aSize, aScale)));
-				GL.Vertex(aPosition + capDir.MultiplyPoint(Vector3.Scale(new Vector3(-1,-1,-1) * aSize, aScale)));
+					GL.Vertex(aPosition + capDir.MultiplyPoint(Vector3.Scale(new Vector3(-1,-1, 1) * aSize, aScale)));
+					GL.Vertex(aPosition + capDir.MultiplyPoint(Vector3.Scale(new Vector3(-1, 1, 1) * aSize, aScale)));
+					GL.Vertex(aPosition + capDir.MultiplyPoint(Vector3.Scale(new Vector3(-1, 1,-1) * aSize, aScale)));
+					GL.Vertex(aPosition + capDir.MultiplyPoint(Vector3.Scale(new Vector3(-1,-1,-1) * aSize, aScale)));
 				
-				GL.Vertex(aPosition + capDir.MultiplyPoint(Vector3.Scale(new Vector3( 1,-1,-1) * aSize, aScale)));
-				GL.Vertex(aPosition + capDir.MultiplyPoint(Vector3.Scale(new Vector3( 1, 1,-1) * aSize, aScale)));
-				GL.Vertex(aPosition + capDir.MultiplyPoint(Vector3.Scale(new Vector3( 1, 1, 1) * aSize, aScale)));
-				GL.Vertex(aPosition + capDir.MultiplyPoint(Vector3.Scale(new Vector3( 1,-1, 1) * aSize, aScale)));
+					GL.Vertex(aPosition + capDir.MultiplyPoint(Vector3.Scale(new Vector3( 1,-1,-1) * aSize, aScale)));
+					GL.Vertex(aPosition + capDir.MultiplyPoint(Vector3.Scale(new Vector3( 1, 1,-1) * aSize, aScale)));
+					GL.Vertex(aPosition + capDir.MultiplyPoint(Vector3.Scale(new Vector3( 1, 1, 1) * aSize, aScale)));
+					GL.Vertex(aPosition + capDir.MultiplyPoint(Vector3.Scale(new Vector3( 1,-1, 1) * aSize, aScale)));
 				
-				GL.End();
-				GL.PopMatrix();
+					GL.End();
+					GL.PopMatrix();
+				}
+			} else if (aEvent == EventType.Layout) {
+				HandleUtility.AddControl(aControlID, HandleUtility.DistanceToRectangle(aPosition, aRotation, aSize));
 			}
 		}
-		public static void DiamondCapDir(int aControlID, Vector3 aPosition, Quaternion aRotation, float aSize) {
-			if (Event.current.type != EventType.Repaint) {
-				return;
-			}
-			aPosition  = Handles.matrix.MultiplyPoint(aPosition);
+		public static void DiamondCapDir(int aControlID, Vector3 aPosition, Quaternion aRotation, float aSize, EventType aEvent) {
+			if (aEvent == EventType.Repaint) {
+				aPosition  = Handles.matrix.MultiplyPoint(aPosition);
 			
-			for (int i = 0; i < CapMaterial3D.passCount; ++i) {
-				CapMaterial3D.SetPass(i);
+				for (int i = 0; i < CapMaterial3D.passCount; ++i) {
+					CapMaterial3D.SetPass(i);
 				
-				GL.PushMatrix();
-				GL.Begin(GL.TRIANGLES);
-				GL.Color(Handles.color);
+					GL.PushMatrix();
+					GL.Begin(GL.TRIANGLES);
+					GL.Color(Handles.color);
 				
-				GL.Color(Handles.color);
-				GL.Vertex(aPosition + capDir.MultiplyPoint(new Vector3(-1,0,-1) * aSize * .5f));
-				GL.Vertex(aPosition + capDir.MultiplyPoint(new Vector3(-1,0, 1) * aSize * .5f));
-				GL.Color(Color.Lerp(Handles.color, Color.black, 0.35f));
-				GL.Vertex(aPosition + capDir.MultiplyPoint(new Vector3( 0, 1, 0) * aSize));
+					GL.Color(Handles.color);
+					GL.Vertex(aPosition + capDir.MultiplyPoint(new Vector3(-1,0,-1) * aSize * .5f));
+					GL.Vertex(aPosition + capDir.MultiplyPoint(new Vector3(-1,0, 1) * aSize * .5f));
+					GL.Color(Color.Lerp(Handles.color, Color.black, 0.35f));
+					GL.Vertex(aPosition + capDir.MultiplyPoint(new Vector3( 0, 1, 0) * aSize));
 				
-				GL.Color(Handles.color);
-				GL.Vertex(aPosition + capDir.MultiplyPoint(new Vector3( 1,0, 1) * aSize * .5f));
-				GL.Vertex(aPosition + capDir.MultiplyPoint(new Vector3( 1,0,-1) * aSize * .5f));
-				GL.Color(Color.Lerp(Handles.color, Color.black, 0.35f));
-				GL.Vertex(aPosition + capDir.MultiplyPoint(new Vector3( 0, 1, 0) * aSize));
+					GL.Color(Handles.color);
+					GL.Vertex(aPosition + capDir.MultiplyPoint(new Vector3( 1,0, 1) * aSize * .5f));
+					GL.Vertex(aPosition + capDir.MultiplyPoint(new Vector3( 1,0,-1) * aSize * .5f));
+					GL.Color(Color.Lerp(Handles.color, Color.black, 0.35f));
+					GL.Vertex(aPosition + capDir.MultiplyPoint(new Vector3( 0, 1, 0) * aSize));
 				
-				GL.Color(Handles.color);
-				GL.Vertex(aPosition + capDir.MultiplyPoint(new Vector3( 1,0,-1) * aSize * .5f));
-				GL.Vertex(aPosition + capDir.MultiplyPoint(new Vector3(-1,0,-1) * aSize * .5f));
-				GL.Color(Color.Lerp(Handles.color, Color.black, 0.35f));
-				GL.Vertex(aPosition + capDir.MultiplyPoint(new Vector3( 0, 1, 0) * aSize));
+					GL.Color(Handles.color);
+					GL.Vertex(aPosition + capDir.MultiplyPoint(new Vector3( 1,0,-1) * aSize * .5f));
+					GL.Vertex(aPosition + capDir.MultiplyPoint(new Vector3(-1,0,-1) * aSize * .5f));
+					GL.Color(Color.Lerp(Handles.color, Color.black, 0.35f));
+					GL.Vertex(aPosition + capDir.MultiplyPoint(new Vector3( 0, 1, 0) * aSize));
 				
-				GL.Color(Handles.color);
-				GL.Vertex(aPosition + capDir.MultiplyPoint(new Vector3(-1,0, 1) * aSize * .5f));
-				GL.Vertex(aPosition + capDir.MultiplyPoint(new Vector3( 1,0, 1) * aSize * .5f));
-				GL.Color(Color.Lerp(Handles.color, Color.black, 0.35f));
-				GL.Vertex(aPosition + capDir.MultiplyPoint(new Vector3( 0, 1, 0) * aSize));
+					GL.Color(Handles.color);
+					GL.Vertex(aPosition + capDir.MultiplyPoint(new Vector3(-1,0, 1) * aSize * .5f));
+					GL.Vertex(aPosition + capDir.MultiplyPoint(new Vector3( 1,0, 1) * aSize * .5f));
+					GL.Color(Color.Lerp(Handles.color, Color.black, 0.35f));
+					GL.Vertex(aPosition + capDir.MultiplyPoint(new Vector3( 0, 1, 0) * aSize));
 				
 				
-				GL.Color(Handles.color);
-				GL.Vertex(aPosition + capDir.MultiplyPoint(new Vector3(-1,0, 1) * aSize * .5f));
-				GL.Vertex(aPosition + capDir.MultiplyPoint(new Vector3(-1,0,-1) * aSize * .5f));
-				GL.Color(Color.Lerp(Handles.color, Color.black, 0.35f));
-				GL.Vertex(aPosition + capDir.MultiplyPoint(new Vector3( 0, -1, 0) * aSize));
+					GL.Color(Handles.color);
+					GL.Vertex(aPosition + capDir.MultiplyPoint(new Vector3(-1,0, 1) * aSize * .5f));
+					GL.Vertex(aPosition + capDir.MultiplyPoint(new Vector3(-1,0,-1) * aSize * .5f));
+					GL.Color(Color.Lerp(Handles.color, Color.black, 0.35f));
+					GL.Vertex(aPosition + capDir.MultiplyPoint(new Vector3( 0, -1, 0) * aSize));
 				
-				GL.Color(Handles.color);
-				GL.Vertex(aPosition + capDir.MultiplyPoint(new Vector3( 1,0,-1) * aSize * .5f));
-				GL.Vertex(aPosition + capDir.MultiplyPoint(new Vector3( 1,0, 1) * aSize * .5f));
-				GL.Color(Color.Lerp(Handles.color, Color.black, 0.35f));
-				GL.Vertex(aPosition + capDir.MultiplyPoint(new Vector3( 0, -1, 0) * aSize));
+					GL.Color(Handles.color);
+					GL.Vertex(aPosition + capDir.MultiplyPoint(new Vector3( 1,0,-1) * aSize * .5f));
+					GL.Vertex(aPosition + capDir.MultiplyPoint(new Vector3( 1,0, 1) * aSize * .5f));
+					GL.Color(Color.Lerp(Handles.color, Color.black, 0.35f));
+					GL.Vertex(aPosition + capDir.MultiplyPoint(new Vector3( 0, -1, 0) * aSize));
 				
-				GL.Color(Handles.color);
-				GL.Vertex(aPosition + capDir.MultiplyPoint(new Vector3(-1,0,-1) * aSize * .5f));
-				GL.Vertex(aPosition + capDir.MultiplyPoint(new Vector3( 1,0,-1) * aSize * .5f));
-				GL.Color(Color.Lerp(Handles.color, Color.black, 0.35f));
-				GL.Vertex(aPosition + capDir.MultiplyPoint(new Vector3( 0, -1, 0) * aSize));
+					GL.Color(Handles.color);
+					GL.Vertex(aPosition + capDir.MultiplyPoint(new Vector3(-1,0,-1) * aSize * .5f));
+					GL.Vertex(aPosition + capDir.MultiplyPoint(new Vector3( 1,0,-1) * aSize * .5f));
+					GL.Color(Color.Lerp(Handles.color, Color.black, 0.35f));
+					GL.Vertex(aPosition + capDir.MultiplyPoint(new Vector3( 0, -1, 0) * aSize));
 				
-				GL.Color(Handles.color);
-				GL.Vertex(aPosition + capDir.MultiplyPoint(new Vector3( 1,0, 1) * aSize * .5f));
-				GL.Vertex(aPosition + capDir.MultiplyPoint(new Vector3(-1,0, 1) * aSize * .5f));
-				GL.Color(Color.Lerp(Handles.color, Color.black, 0.35f));
-				GL.Vertex(aPosition + capDir.MultiplyPoint(new Vector3( 0, -1, 0) * aSize));
+					GL.Color(Handles.color);
+					GL.Vertex(aPosition + capDir.MultiplyPoint(new Vector3( 1,0, 1) * aSize * .5f));
+					GL.Vertex(aPosition + capDir.MultiplyPoint(new Vector3(-1,0, 1) * aSize * .5f));
+					GL.Color(Color.Lerp(Handles.color, Color.black, 0.35f));
+					GL.Vertex(aPosition + capDir.MultiplyPoint(new Vector3( 0, -1, 0) * aSize));
 				
-				GL.End();
-				GL.PopMatrix();
+					GL.End();
+					GL.PopMatrix();
+				}
+			} else if (aEvent == EventType.Layout) {
+				HandleUtility.AddControl(aControlID, HandleUtility.DistanceToRectangle(aPosition, aRotation, aSize));
 			}
 		}
-		public static void ArrowCapDirBase(int aControlID, Vector3 aPosition, Quaternion aRotation, float aSize, Vector3 aDir) {
-			if (Event.current.type != EventType.Repaint) {
-				return;
+		public static void ArrowCapDirBase(int aControlID, Vector3 aPosition, Quaternion aRotation, float aSize, Vector3 aDir, EventType aEvent) {
+			if (aEvent == EventType.Repaint) {
+				aPosition  = Handles.matrix.MultiplyPoint(aPosition);
+				Quaternion rot = Quaternion.LookRotation(aDir);
+			
+				for (int i = 0; i < CapMaterial3D.passCount; ++i) {
+					CapMaterial3D.SetPass(i);
+			
+					GL.PushMatrix();
+					GL.Begin(GL.TRIANGLES);
+					GL.Color(Handles.color);
+				
+					GL.Vertex(aPosition + capDir.MultiplyPoint(rot * new Vector3(-1, 1,0) * aSize * .5f));
+					GL.Vertex(aPosition + capDir.MultiplyPoint(rot * new Vector3(-1,-1,0) * aSize * .5f));
+					GL.Vertex(aPosition + capDir.MultiplyPoint(rot * new Vector3( 0, 0, 1) * aSize));
+				
+					GL.Vertex(aPosition + capDir.MultiplyPoint(rot * new Vector3( 1,-1,0) * aSize * .5f));
+					GL.Vertex(aPosition + capDir.MultiplyPoint(rot * new Vector3( 1, 1,0) * aSize * .5f));
+					GL.Vertex(aPosition + capDir.MultiplyPoint(rot * new Vector3( 0, 0, 1) * aSize));
+				
+					GL.Vertex(aPosition + capDir.MultiplyPoint(rot * new Vector3(-1,-1,0) * aSize * .5f));
+					GL.Vertex(aPosition + capDir.MultiplyPoint(rot * new Vector3( 1,-1,0) * aSize * .5f));
+					GL.Vertex(aPosition + capDir.MultiplyPoint(rot * new Vector3( 0, 0, 1) * aSize));
+				
+					GL.Vertex(aPosition + capDir.MultiplyPoint(rot * new Vector3( 1, 1,0) * aSize * .5f));
+					GL.Vertex(aPosition + capDir.MultiplyPoint(rot * new Vector3(-1, 1,0) * aSize * .5f));
+					GL.Vertex(aPosition + capDir.MultiplyPoint(rot * new Vector3( 0, 0, 1) * aSize));
+				
+					GL.Vertex(aPosition + capDir.MultiplyPoint(rot * new Vector3(-1, 1,0) * aSize * .5f));
+					GL.Vertex(aPosition + capDir.MultiplyPoint(rot * new Vector3( 1, 1,0) * aSize * .5f));
+					GL.Vertex(aPosition + capDir.MultiplyPoint(rot * new Vector3(-1,-1,0) * aSize * .5f));
+				
+					GL.Vertex(aPosition + capDir.MultiplyPoint(rot * new Vector3( 1, 1,0) * aSize * .5f));
+					GL.Vertex(aPosition + capDir.MultiplyPoint(rot * new Vector3( 1,-1,0) * aSize * .5f));
+					GL.Vertex(aPosition + capDir.MultiplyPoint(rot * new Vector3(-1,-1,0) * aSize * .5f));
+				
+					GL.End();
+					GL.PopMatrix();
+				}
+			} else if (aEvent == EventType.Layout) {
+				HandleUtility.AddControl(aControlID, HandleUtility.DistanceToRectangle(aPosition, aRotation, aSize));
 			}
-			aPosition  = Handles.matrix.MultiplyPoint(aPosition);
-			Quaternion rot = Quaternion.LookRotation(aDir);
-			
-			for (int i = 0; i < CapMaterial3D.passCount; ++i) {
-				CapMaterial3D.SetPass(i);
-			
-				GL.PushMatrix();
-				GL.Begin(GL.TRIANGLES);
-				GL.Color(Handles.color);
-				
-				//GL.Color(Color.Lerp(Handles.color, Color.black, 0.35f));
-				GL.Vertex(aPosition + capDir.MultiplyPoint(rot * new Vector3(-1, 1,0) * aSize * .5f));
-				GL.Vertex(aPosition + capDir.MultiplyPoint(rot * new Vector3(-1,-1,0) * aSize * .5f));
-				//GL.Color(Handles.color);
-				GL.Vertex(aPosition + capDir.MultiplyPoint(rot * new Vector3( 0, 0, 1) * aSize));
-				
-				//GL.Color(Color.Lerp(Handles.color, Color.black, 0.35f));
-				GL.Vertex(aPosition + capDir.MultiplyPoint(rot * new Vector3( 1,-1,0) * aSize * .5f));
-				GL.Vertex(aPosition + capDir.MultiplyPoint(rot * new Vector3( 1, 1,0) * aSize * .5f));
-				//GL.Color(Handles.color);
-				GL.Vertex(aPosition + capDir.MultiplyPoint(rot * new Vector3( 0, 0, 1) * aSize));
-				
-				//GL.Color(Color.Lerp(Handles.color, Color.black, 0.35f));
-				GL.Vertex(aPosition + capDir.MultiplyPoint(rot * new Vector3(-1,-1,0) * aSize * .5f));
-				GL.Vertex(aPosition + capDir.MultiplyPoint(rot * new Vector3( 1,-1,0) * aSize * .5f));
-				//GL.Color(Handles.color);
-				GL.Vertex(aPosition + capDir.MultiplyPoint(rot * new Vector3( 0, 0, 1) * aSize));
-				
-				//GL.Color(Color.Lerp(Handles.color, Color.black, 0.35f));
-				GL.Vertex(aPosition + capDir.MultiplyPoint(rot * new Vector3( 1, 1,0) * aSize * .5f));
-				GL.Vertex(aPosition + capDir.MultiplyPoint(rot * new Vector3(-1, 1,0) * aSize * .5f));
-				//GL.Color(Handles.color);
-				GL.Vertex(aPosition + capDir.MultiplyPoint(rot * new Vector3( 0, 0, 1) * aSize));
-				
-				//GL.Color(Color.Lerp(Handles.color, Color.black, 0.35f));
-				GL.Vertex(aPosition + capDir.MultiplyPoint(rot * new Vector3(-1, 1,0) * aSize * .5f));
-				GL.Vertex(aPosition + capDir.MultiplyPoint(rot * new Vector3( 1, 1,0) * aSize * .5f));
-				GL.Vertex(aPosition + capDir.MultiplyPoint(rot * new Vector3(-1,-1,0) * aSize * .5f));
-				
-				GL.Vertex(aPosition + capDir.MultiplyPoint(rot * new Vector3( 1, 1,0) * aSize * .5f));
-				GL.Vertex(aPosition + capDir.MultiplyPoint(rot * new Vector3( 1,-1,0) * aSize * .5f));
-				GL.Vertex(aPosition + capDir.MultiplyPoint(rot * new Vector3(-1,-1,0) * aSize * .5f));
-				
-				GL.End();
-				GL.PopMatrix();
-			}
-			
 		}
-		public static void ArrowCapXP(int aControlID, Vector3 aPosition, Quaternion aRotation, float aSize) {
-			ArrowCapDirBase(aControlID, aPosition, aRotation, aSize, new Vector3(1, 0, 0));
+		public static void ArrowCapXP(int aControlID, Vector3 aPosition, Quaternion aRotation, float aSize, EventType aType) {
+			ArrowCapDirBase(aControlID, aPosition, aRotation, aSize, new Vector3(1, 0, 0), aType);
 		}
-		public static void ArrowCapXN(int aControlID, Vector3 aPosition, Quaternion aRotation, float aSize) {
-			ArrowCapDirBase(aControlID, aPosition, aRotation, aSize, new Vector3(-1, 0, 0));
+		public static void ArrowCapXN(int aControlID, Vector3 aPosition, Quaternion aRotation, float aSize, EventType aType) {
+			ArrowCapDirBase(aControlID, aPosition, aRotation, aSize, new Vector3(-1, 0, 0), aType);
 		}
-		public static void ArrowCapZP(int aControlID, Vector3 aPosition, Quaternion aRotation, float aSize) {
-			ArrowCapDirBase(aControlID, aPosition, aRotation, aSize, new Vector3(0, 0, 1));
+		public static void ArrowCapZP(int aControlID, Vector3 aPosition, Quaternion aRotation, float aSize, EventType aType) {
+			ArrowCapDirBase(aControlID, aPosition, aRotation, aSize, new Vector3(0, 0, 1), aType);
 		}
-		public static void ArrowCapZN(int aControlID, Vector3 aPosition, Quaternion aRotation, float aSize) {
-			ArrowCapDirBase(aControlID, aPosition, aRotation, aSize, new Vector3(0, 0, -1));
+		public static void ArrowCapZN(int aControlID, Vector3 aPosition, Quaternion aRotation, float aSize, EventType aType) {
+			ArrowCapDirBase(aControlID, aPosition, aRotation, aSize, new Vector3(0, 0, -1), aType);
 		}
-		public static void ArrowCapYP(int aControlID, Vector3 aPosition, Quaternion aRotation, float aSize) {
-			ArrowCapDirBase(aControlID, aPosition, aRotation, aSize, new Vector3(0, 1, 0));
+		public static void ArrowCapYP(int aControlID, Vector3 aPosition, Quaternion aRotation, float aSize, EventType aType) {
+			ArrowCapDirBase(aControlID, aPosition, aRotation, aSize, new Vector3(0, 1, 0), aType);
 		}
-		public static void ArrowCapYN(int aControlID, Vector3 aPosition, Quaternion aRotation, float aSize) {
-			ArrowCapDirBase(aControlID, aPosition, aRotation, aSize, new Vector3(0, -1, 0));
+		public static void ArrowCapYN(int aControlID, Vector3 aPosition, Quaternion aRotation, float aSize, EventType aType) {
+			ArrowCapDirBase(aControlID, aPosition, aRotation, aSize, new Vector3(0, -1, 0), aType);
 		}
 		
-		public static void BarCapX(int aControlID, Vector3 aPosition, Quaternion aRotation, float aSize) {
-			CubeCapDirBase(aControlID, aPosition, aRotation, aSize, new Vector3(1, .25f, .25f));
+		public static void BarCapX(int aControlID, Vector3 aPosition, Quaternion aRotation, float aSize, EventType aType) {
+			CubeCapDirBase(aControlID, aPosition, aRotation, aSize, new Vector3(1, .25f, .25f), aType);
 		}
-		public static void BarCapY(int aControlID, Vector3 aPosition, Quaternion aRotation, float aSize) {
-			CubeCapDirBase(aControlID, aPosition, aRotation, aSize, new Vector3(.25f, 1, .25f));
+		public static void BarCapY(int aControlID, Vector3 aPosition, Quaternion aRotation, float aSize, EventType aType) {
+			CubeCapDirBase(aControlID, aPosition, aRotation, aSize, new Vector3(.25f, 1, .25f), aType);
 		}
-		public static void BarCapZ(int aControlID, Vector3 aPosition, Quaternion aRotation, float aSize) {
-			CubeCapDirBase(aControlID, aPosition, aRotation, aSize, new Vector3(.25f, .25f, 1));
+		public static void BarCapZ(int aControlID, Vector3 aPosition, Quaternion aRotation, float aSize, EventType aType) {
+			CubeCapDirBase(aControlID, aPosition, aRotation, aSize, new Vector3(.25f, .25f, 1), aType);
 		}
-		public static void BarCapXZ(int aControlID, Vector3 aPosition, Quaternion aRotation, float aSize) {
-			CubeCapDirBase(aControlID, aPosition, aRotation, aSize, new Vector3(.25f, .25f, .25f));
+		public static void BarCapXZ(int aControlID, Vector3 aPosition, Quaternion aRotation, float aSize, EventType aType) {
+			CubeCapDirBase(aControlID, aPosition, aRotation, aSize, new Vector3(.25f, .25f, .25f), aType);
 		}
         #endregion
     }

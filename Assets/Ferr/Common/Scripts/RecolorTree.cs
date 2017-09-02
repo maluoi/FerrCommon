@@ -133,7 +133,12 @@ namespace Ferr {
 		TreeNode     root;
 		TreeSettings settings;
 		
-		public RecolorTree(Mesh aMesh, bool aX = true, bool aY = true, bool aZ = true) {
+		public RecolorTree(Mesh aMesh, Matrix4x4? aTransform = null, bool aX = true, bool aY = true, bool aZ = true) {
+			if (aMesh == null) {
+				Create(new Vector3[] { Vector3.zero }, new Color[] { Color.white }, aTransform, aX, aY, aZ);
+				return;
+			}
+
 			Vector3[] points = aMesh.vertices;
 			Color  [] cols   = aMesh.colors;
 			if (cols == null || cols.Length == 0) {
@@ -141,13 +146,13 @@ namespace Ferr {
 				for (int i = 0; i < cols.Length; ++i) cols[i] = Color.white;
 			}
 			
-			Create(points, cols, aX, aY, aZ);
+			Create(points, cols, aTransform, aX, aY, aZ);
 		}
-		public RecolorTree(Vector3[] aPoints, Color[] aColors, bool aX = true, bool aY = true, bool aZ = true) {
-			Create(aPoints, aColors, aX, aY, aZ);
+		public RecolorTree(Vector3[] aPoints, Color[] aColors, Matrix4x4? aTransform = null, bool aX = true, bool aY = true, bool aZ = true) {
+			Create(aPoints, aColors, aTransform, aX, aY, aZ);
 		}
-		public RecolorTree(List<Vector3> aPoints, List<Color> aColors, bool aX = true, bool aY = true, bool aZ = true) {
-			Create(aPoints, aColors, aX, aY, aZ);
+		public RecolorTree(List<Vector3> aPoints, List<Color> aColors, Matrix4x4? aTransform = null, bool aX = true, bool aY = true, bool aZ = true) {
+			Create(aPoints, aColors, aTransform, aX, aY, aZ);
 		}
 		public TreePoint Get(Vector3 aAt) {
 			TreePoint pt   = null;
@@ -156,6 +161,9 @@ namespace Ferr {
 			return pt;
 		}
 		public void Recolor(ref Mesh aMesh, Matrix4x4? aTransform = null) {
+			if (aMesh == null)
+				return;
+
 			Vector3[] points = aMesh.vertices;
 			aMesh.colors = Recolor(points, aTransform);
 		}
@@ -173,28 +181,46 @@ namespace Ferr {
 			
 			return cols;
 		}
-		
+		public List<Color> Recolor(List<Vector3> aAt, Matrix4x4? aTransform = null) {
+			List<Color> cols = new List<Color>(aAt.Count);
+
+			if (aTransform.HasValue) for (int i = 0; i < aAt.Count; ++i) cols[i] = Get(aTransform.Value.MultiplyPoint(aAt[i])).data;
+			else                     for (int i = 0; i < aAt.Count; ++i) cols[i] = Get(aAt[i]).data;
+			
+			return cols;
+		}
+		public void Recolor(List<Vector3> aPoints, ref List<Color> aColors, Matrix4x4? aTransform = null) {
+			if (aTransform.HasValue) for (int i = 0; i < aPoints.Count; ++i) aColors.Add( Get(aTransform.Value.MultiplyPoint(aPoints[i])).data );
+			else                     for (int i = 0; i < aPoints.Count; ++i) aColors.Add( Get(aPoints[i]).data );
+		}
+
 		public void DrawTree () {
 			TreeSettings settings = new TreeSettings(true, true, true);
 			root.Draw(settings, 0, Vector3.zero);
 		}
 		
-		void Create(Vector3[] aPoints, Color[] aColors, bool aX, bool aY, bool aZ) {
+		void Create(Vector3[] aPoints, Color[] aColors, Matrix4x4? aTransform, bool aX, bool aY, bool aZ) {
 			if (aPoints.Length != aColors.Length) Debug.LogError("Arguments must be the same length!");
 			List<TreePoint> points = new List<TreePoint>(aPoints.Length);
 			
 			for (int i = 0; i < aPoints.Length; ++i) {
-				points.Add(new TreePoint(aPoints[i], aColors[i]));
+				Vector3 pt = aPoints[i];
+				if (aTransform.HasValue)
+					pt = aTransform.Value.MultiplyPoint(pt);
+				points.Add(new TreePoint(pt, aColors[i]));
 			}
 			settings = new TreeSettings(aX, aY, aZ);
 			root     = new TreeNode    (settings, points, 0);
 		}
-		void Create(List<Vector3> aPoints, List<Color> aColors, bool aX, bool aY, bool aZ) {
+		void Create(List<Vector3> aPoints, List<Color> aColors, Matrix4x4? aTransform, bool aX, bool aY, bool aZ) {
 			if (aPoints.Count != aColors.Count) Debug.LogError("Arguments must be the same length!");
 			List<TreePoint> points = new List<TreePoint>(aPoints.Count);
 			
 			for (int i = 0; i < aPoints.Count; ++i) {
-				points.Add(new TreePoint(aPoints[i], aColors[i]));
+				Vector3 pt = aPoints[i];
+				if (aTransform.HasValue)
+					pt = aTransform.Value.MultiplyPoint(pt);
+				points.Add(new TreePoint(pt, aColors[i]));
 			}
 			settings = new TreeSettings(aX, aY, aZ);
 			root     = new TreeNode    (settings, points, 0);

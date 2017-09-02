@@ -34,13 +34,13 @@ namespace Ferr {
 			return new UnityEditor.SerializedObject(UnityEditor.AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset")[0]);
 		}
 		static SerializedProperty[] GetLayers(SerializedObject aLayerManager) {
-			#if UNITY_5
-			SerializedProperty   layers = aLayerManager.FindProperty("layers");
+			#if UNITY_5_3_OR_NEWER
+			SerializedProperty layers = aLayerManager.FindProperty("layers");
 			#endif
 			SerializedProperty[] result = new SerializedProperty[32];
 			
 			for (int i=0; i<32; i+=1) {
-				#if UNITY_5
+				#if UNITY_5_3_OR_NEWER
 				SerializedProperty property = layers.GetArrayElementAtIndex(i);
 				#else
 				string             name     = i < 8 ? "Builtin Layer "+i : "User Layer "+i;

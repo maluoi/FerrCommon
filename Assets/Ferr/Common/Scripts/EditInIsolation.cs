@@ -35,7 +35,7 @@ public class EditInIsolation : MonoBehaviour {
 	[SerializeField] bool[] _wasEnabled;
 
 	#if UNITY_EDITOR
-	[MenuItem("Assets/Edit In Isolation", false, 10)]
+	[MenuItem("Assets/Edit In Isolation", false, 30)]
 	static void Edit() {
 		Object[]     objs           = Selection.gameObjects;
 		List<Object> result         = new List<Object>();

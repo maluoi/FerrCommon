@@ -34,14 +34,9 @@ namespace Ferr {
 			aMesh.Build(true);
 			Mesh m = aMesh.MeshData;
 			
-			if (m.name.Contains(ProceduralMeshUtil.cProcMeshPrefix)) {
-				return;
-			}
-			
 			string name = "";
 			string file = "";
-			GetUniquePath((aMesh as Component).gameObject, out name, out file);
-			m.name = name;
+			GetUniquePath((aMesh as Component).gameObject, m.name, out name, out file);
 			
 			try {
 				UnityEditor.AssetDatabase.CreateAsset(m, file);
@@ -50,14 +45,10 @@ namespace Ferr {
 				Debug.LogError("Unable to save prefab procedural mesh! Likely, you deleted the mesh files, and the prefab is still referencing them. Restarting your Unity editor should solve this minor issue.");
 			}
 		}
-		static void GetUniquePath(GameObject aObj, out string aName, out string aFileName) {
+		static void GetUniquePath(GameObject aObj, string aMeshName, out string aName, out string aFileName) {
 			string    path = Path.GetDirectoryName(AssetDatabase.GetAssetPath(aObj)) + "/Meshes";
-			string    name = aObj.name;
+			string    name = aMeshName;
 			Transform curr = aObj.transform.parent;
-			
-			// climb the parent/child tree
-			while (curr != null) { name = curr.name + "." + name; curr = curr.transform.parent; }
-			name = ProceduralMeshUtil.cProcMeshPrefix + name;
 			
 			// make sure the path folder exists
 			if (!Directory.Exists(path)) {

@@ -18,7 +18,9 @@ namespace Ferr {
 					}
 					restore.OriginalMesh = aFilter.sharedMesh;
 				}
-				
+
+				if (aFilter.sharedMesh == null)
+					aFilter.sharedMesh = new Mesh();
 				aFilter.sharedMesh = Object.Instantiate(aFilter.sharedMesh);
 				aFilter.sharedMesh.name = MakeInstName(aFilter);
 			} else if (!IsCorrectName(aFilter)) {
@@ -27,13 +29,17 @@ namespace Ferr {
 			}
 		}
 		public static bool IsProceduralMesh(MeshFilter aFilter) {
+			if (aFilter == null || aFilter.sharedMesh == null)
+				return false;
 			return aFilter.sharedMesh.name.StartsWith(cProcMeshPrefix);
 		}
 		public static string MakeInstName(MeshFilter aFilter) {
 			return string.Format("{0}{1}_{2}", cProcMeshPrefix, aFilter.gameObject.name, aFilter.GetInstanceID());
 		}
 		public static bool IsCorrectName(MeshFilter aFilter) {
-			return aFilter.name == MakeInstName(aFilter);
+			if (aFilter == null || aFilter.sharedMesh == null)
+				return false;
+			return aFilter.sharedMesh.name == MakeInstName(aFilter);
 		}
 	}
 }

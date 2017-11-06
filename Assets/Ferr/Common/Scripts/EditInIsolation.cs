@@ -68,6 +68,9 @@ public class EditInIsolation : MonoBehaviour {
 		// find the isolation scene
 		for (int i = 0; i < EditorSceneManager.sceneCount; i++) {
 			Scene scene = EditorSceneManager.GetSceneAt(i);
+            if (!scene.isLoaded)
+                continue;
+
 			GameObject[] roots = scene.GetRootGameObjects();
 			edit = GetFrom(roots);
 			if (edit != null)
@@ -82,6 +85,9 @@ public class EditInIsolation : MonoBehaviour {
 		// find the isolation scene
 		for (int i = 0; i < EditorSceneManager.sceneCount; i++) {
 			result = EditorSceneManager.GetSceneAt(i);
+            if (!result.isLoaded)
+                continue;
+
 			GameObject[] roots = result.GetRootGameObjects();
 			edit = GetFrom(roots);
 			if (edit != null) 

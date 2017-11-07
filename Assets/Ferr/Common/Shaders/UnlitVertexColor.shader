@@ -24,14 +24,14 @@ Shader "Ferr/Common/Unlit Vertex Color" {
 			    float4 position : POSITION;
 			    fixed4 color    : COLOR;
 			    #if USE_TEX
-			    half2 uv        : TEXCOORD0;
+			    float2 uv       : TEXCOORD0;
 			    #endif
 			};
 			struct VS_OUT {
 				float4 position : SV_POSITION;
 				fixed4 color    : COLOR;
 				#if USE_TEX
-			    half2 uv        : TEXCOORD0;
+			    float2 uv       : TEXCOORD0;
 			    #endif
 			};
 
@@ -57,5 +57,5 @@ Shader "Ferr/Common/Unlit Vertex Color" {
 			ENDCG
 		}
 	}
-	CustomEditor "UnlitVertexColorEditor"
+	CustomEditor "Ferr.UnlitVertexColorEditor"
 }

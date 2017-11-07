@@ -1,15 +1,12 @@
 ﻿using UnityEditor;
 using UnityEngine;
-using System.Collections;
 
 namespace Ferr {
-	public class UnlitVertexColorEditor : MaterialEditor {
-		public override void OnInspectorGUI () {
-			base.OnInspectorGUI ();
-			if (!isVisible)
-				return;
+	public class UnlitVertexColorEditor : ShaderGUI {
+		public override void OnGUI (MaterialEditor aMaterialEditor, MaterialProperty[] aProperties) {
+			base.OnGUI (aMaterialEditor, aProperties);
 			
-			Material targetMat = target as Material;
+			Material targetMat = aMaterialEditor.target as Material;
 			string[] keyWords  = targetMat.shaderKeywords;
 			
 			bool noTex = System.Array.IndexOf(keyWords, "NO_TEX") != -1;

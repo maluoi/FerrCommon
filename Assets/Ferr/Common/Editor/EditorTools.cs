@@ -2,6 +2,7 @@
 using UnityEditor;
 using System.Collections.Generic;
 using System.Reflection;
+using System;
 
 namespace Ferr {
 	public class EditorTools {
@@ -44,10 +45,20 @@ namespace Ferr {
 		#endregion
 
 		#region General utilities
+		public static bool IsVisibleInSceneView(Vector3 aWorldPoint) {
+			Vector3 pt = SceneView.lastActiveSceneView.camera.WorldToViewportPoint(aWorldPoint);
+			return pt.x>=0 && pt.x<=1 && pt.y>=0 && pt.y<=1 && pt.z>0;
+		}
 		public static Vector3   GetUnitySnap() {
             return new Vector3(EditorPrefs.GetFloat("MoveSnapX", 1), EditorPrefs.GetFloat("MoveSnapY", 1), EditorPrefs.GetFloat("MoveSnapZ", 1));
         }
-		public static MultiType IsStatic(Object[] aItems) {
+		public static float     GetUnityScaleSnap() {
+            return EditorPrefs.GetFloat("ScaleSnap", .1f);
+        }
+		public static float     GetUnityRotationSnap() {
+            return EditorPrefs.GetFloat("RotationSnap", 15);
+        }
+		public static MultiType IsStatic(UnityEngine.Object[] aItems) {
 			MultiType result = MultiType.None;
 			for (int i = 0; i < aItems.Length; ++i) {
 				if ((aItems[i] as Component).gameObject.isStatic) {
@@ -100,6 +111,51 @@ namespace Ferr {
 				if (!enm.MoveNext()) return null;
 			}
 			return enm.Current;
+		}
+		public static Vector3 ProjectPoint(Vector3 aPoint, Plane aPlane) {
+			Ray r = new Ray(SceneView.lastActiveSceneView.camera.transform.position, aPoint - SceneView.lastActiveSceneView.camera.transform.position);
+			float d = 0;
+
+			if (aPlane.Raycast(r, out d)) {
+				return r.GetPoint(d); ;
+			}
+			return aPoint;
+		}
+		public static T    GetEditorVar<T>(string aName, ref T? aVar, T aDefault) where T : struct  {
+			Type typ = typeof(T);
+			if (!aVar.HasValue) {
+				if (typ == typeof(bool))
+					aVar = (T)(object)EditorPrefs.GetBool(aName, (bool)(object)aDefault);
+				else if (typ == typeof(string))
+					aVar = (T)(object)EditorPrefs.GetString(aName, (string)(object)aDefault);
+				else if (typ == typeof(float))
+					aVar = (T)(object)EditorPrefs.GetFloat(aName, (float)(object)aDefault);
+				else if (typ == typeof(int) || typ.IsEnum)
+					aVar = (T)(object)EditorPrefs.GetInt(aName, (int)(object)aDefault);
+				else if (typ == typeof(Color))
+					aVar = (T)(object)ColorUtil.FromHex(EditorPrefs.GetString(aName, ColorUtil.ToHex((Color)(object)aDefault)));
+				else
+					Debug.LogError("Bad editor var type!");
+			}
+			return aVar.Value;
+		}
+		public static void SetEditorVar<T>(string aName, ref T? aVar, T aValue) where T : struct  {
+			Type typ = typeof(T);
+			if (!aVar.HasValue || !aVar.Value.Equals(aValue)) {
+				if (typ == typeof(bool))
+					EditorPrefs.SetBool(aName, (bool)(object)aValue);
+				else if (typ == typeof(string))
+					EditorPrefs.SetString(aName, (string)(object)aValue);
+				else if (typ == typeof(float))
+					EditorPrefs.SetFloat(aName, (float)(object)aValue);
+				else if (typ == typeof(int) || typ.IsEnum)
+					EditorPrefs.SetInt(aName, (int)(object)aValue);
+				else if (typ == typeof(Color))
+					EditorPrefs.SetString(aName, ColorUtil.ToHex((Color)(object)aValue));
+				else
+					Debug.LogError("Bad editor var type!");
+				aVar = aValue;
+			}
 		}
 		#endregion
 
@@ -263,6 +319,31 @@ namespace Ferr {
 			GL.End();
 			GL.PopMatrix();
 		}
+
+		public static void DrawPolyLine(List<Vector2> aPts, bool aClosed) {
+			if (Event.current.type != EventType.Repaint || aPts.Count < 2) {
+				return;
+			}
+			Material mat = CapMaterial2D;
+			mat.mainTexture = EditorGUIUtility.whiteTexture;
+			mat.SetPass(0);
+			
+			GL.PushMatrix();
+			GL.MultMatrix(Handles.matrix);
+			GL.Begin(GL.LINE_STRIP);
+			GL.Color(Handles.color);
+
+			int count = aPts.Count;
+			for (int i = 0; i < count; i++) {
+				GL.Vertex(aPts[i]);
+			}
+			if (aClosed)
+				GL.Vertex(aPts[0]);
+
+			GL.End();
+			GL.PopMatrix();
+		}
+
         public static void Box      (int aBorder, System.Action inside) {
             Box(aBorder, inside, 0, 0);
         }
@@ -338,6 +419,11 @@ namespace Ferr {
 		#endregion
 
 		#region Cap methods
+		public static void EmptyCap(int aControlID, Vector3 aPosition, Quaternion aRotation, float aSize, EventType aEvent) {
+            if (aEvent == EventType.Layout){
+                HandleUtility.AddControl(aControlID, HandleUtility.DistanceToRectangle(aPosition, aRotation, aSize));
+            }
+		}
 		public static void CircleCapBase(int aControlID, Vector3 aPosition, Quaternion aRotation, float aSize, EventType aEvent) {
 			if (aEvent == EventType.Repaint) {
 				aPosition = Handles.matrix.MultiplyPoint(aPosition);
@@ -346,50 +432,49 @@ namespace Ferr {
 				CapMaterial2D.mainTexture = null;
 				CapMaterial2D.SetPass(0);
 
-				GL.Begin(GL.TRIANGLES);
+				GL.Begin(GL.QUADS);
 				GL.Color(Handles.color);
+				GL.Vertex(aPosition + up);
+				GL.Vertex(aPosition + right);
+				GL.Vertex(aPosition - up);
+				GL.Vertex(aPosition - right);
 
-				int     count = 6;
-				float   step  = 1f/count * Mathf.PI*2;
-				Vector3 start = aPosition + right;
-				for (int i = 1; i < count; i++) {
-					float p = i*step;
-					GL.Vertex(start);
-					GL.Vertex(aPosition + Mathf.Cos(p+step) * right + Mathf.Sin(p+step) * up);
-					GL.Vertex(aPosition + Mathf.Cos(p) * right + Mathf.Sin(p) * up);
-				}
 				GL.End();
 			} else if (aEvent == EventType.Layout) {
 				HandleUtility.AddControl(aControlID, HandleUtility.DistanceToRectangle(aPosition, aRotation, aSize));
 			}
 		}
 		public static void ImageCapBase(int aControlID, Vector3 aPosition, Quaternion aRotation, float aSize, Texture2D aTex, EventType aEvent) {
-            if (aEvent != EventType.Layout) { 
-                if (aEvent == EventType.Repaint) { 
-			        aPosition = Handles.matrix.MultiplyPoint(aPosition);
-			        Vector3 right = Camera.current.transform.right * aSize;
-			        Vector3 top   = Camera.current.transform.up    * aSize;
-			        CapMaterial2D.mainTexture = aTex;
-			        CapMaterial2D.SetPass(0);
+            if (aEvent == EventType.Repaint ) {
+				Material  mat          = CapMaterial2D;
+				Transform camTransform = Camera.current.transform;
+
+			    aPosition = Handles.matrix.MultiplyPoint(aPosition);
+			    Vector3 right = camTransform.right * aSize;
+				Vector3 top   = camTransform.up    * aSize;
+				Vector3 left = aPosition - right;
+				right += aPosition;
+			    
+			    mat.mainTexture = aTex;
+			    mat.SetPass(0);
 			
-			        GL.Begin(GL.QUADS);
-			        GL.Color(Handles.color);
-			        GL.TexCoord2(1, 1);
-			        GL.Vertex(aPosition + right + top);
+			    GL.Begin(GL.QUADS);
+			    GL.Color(Handles.color);
+			    GL.TexCoord2(1, 1);
+			    GL.Vertex(right + top);
 			
-			        GL.TexCoord2(1, 0);
-			        GL.Vertex(aPosition + right - top);
+			    GL.TexCoord2(1, 0);
+			    GL.Vertex(right - top);
 			
-			        GL.TexCoord2(0, 0);
-			        GL.Vertex(aPosition - right - top);
+			    GL.TexCoord2(0, 0);
+			    GL.Vertex(left - top);
 			
-			        GL.TexCoord2(0, 1);
-			        GL.Vertex(aPosition - right + top);
+			    GL.TexCoord2(0, 1);
+			    GL.Vertex(left + top);
 			
-			        GL.End();
-                }
-            } else {
-                HandleUtility.AddControl(aControlID, HandleUtility.DistanceToRectangle(aPosition, aRotation, aSize));
+			    GL.End();
+            } else if (aEvent == EventType.Layout) {
+                HandleUtility.AddControl(aControlID, HandleUtility.DistanceToCircle(aPosition, aSize));
             }
 		}
         public static void CubeCapDirBase(int aControlID, Vector3 aPosition, Quaternion aRotation, float aSize, Vector3 aScale, EventType aEvent) {

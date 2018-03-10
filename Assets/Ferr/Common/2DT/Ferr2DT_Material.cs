@@ -1,12 +1,14 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
-public class Ferr2DT_Material : ScriptableObject, IFerr2DTMaterial {
+public partial class Ferr2DT_Material : ScriptableObject, IFerr2DTMaterial {
 	#region Fields
 	[SerializeField] Material                     _fillMaterial;
 	[SerializeField] Material                     _edgeMaterial;
 	[SerializeField] private Ferr2DT_SegmentDescription[] _descriptors = new Ferr2DT_SegmentDescription[4];
 	[SerializeField] private bool isPixel = true;
+	[SerializeField] private bool _isPerfect = false;
 	
 	/// <summary>
     /// The material of the interior of the terrain.
@@ -16,6 +18,14 @@ public class Ferr2DT_Material : ScriptableObject, IFerr2DTMaterial {
     /// The material of the edges of the terrain.
     /// </summary>
 	public Material edgeMaterial { get{return _edgeMaterial;} set{_edgeMaterial = value;} }
+	/// <summary>
+	/// How many edge descriptors are present in the material?
+	/// </summary>
+	public int descriptorCount { get{ return _descriptors.Length; } }
+	/// <summary>
+	/// Is this material ok to use for perfect edges?
+	/// </summary>
+	public bool IsPerfect{ get { return _isPerfect; } }
     #endregion
 	
     #region Constructor
@@ -131,14 +141,23 @@ public class Ferr2DT_Material : ScriptableObject, IFerr2DTMaterial {
 			aNativeRect.width  * w,
 			aNativeRect.height * h);
 	}
-    #endregion
-	
-	#if UNITY_EDITOR
-	const string editorMenuName = "Terrain Material";
-	[UnityEditor.MenuItem("GameObject/Create Ferr2D Terrain/" + editorMenuName, false, 11 ), 
-	 UnityEditor.MenuItem("Assets/Create/Ferr2D Terrain/"     + editorMenuName, false, 101)]
-	public static void CreateAsset() {
-		Ferr.SOUtil.CreateAsset(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType, editorMenuName);
+
+	public void Add() {
+		Array.Resize(ref _descriptors, _descriptors.Length+1);
+		var newSegment = new Ferr2DT_SegmentDescription();
+		newSegment.applyTo = (Ferr2DT_TerrainDirection)_descriptors.Length-1;
+		_descriptors[_descriptors.Length-1] = newSegment;
 	}
-	#endif
+	public void Remove(Ferr2DT_TerrainDirection aDirection) {
+		if ((int)aDirection <= 3) {
+			Set(aDirection, false);
+			return;
+		}
+
+		for (int i = (int)aDirection; i < _descriptors.Length-1; i++) {
+			_descriptors[i] = _descriptors[i+1];
+		}
+		Array.Resize(ref _descriptors, _descriptors.Length-1);
+	}
+    #endregion
 }

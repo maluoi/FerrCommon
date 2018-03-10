@@ -9,11 +9,11 @@ namespace Ferr {
 			Material targetMat = aMaterialEditor.target as Material;
 			string[] keyWords  = targetMat.shaderKeywords;
 			
-			bool noTex = System.Array.IndexOf(keyWords, "NO_TEX") != -1;
+			bool useTex = System.Array.IndexOf(keyWords, "NO_TEX") == -1;
 			EditorGUI.BeginChangeCheck();
-			noTex = EditorGUILayout.Toggle ("Don't use texture", noTex);
+			useTex = EditorGUILayout.Toggle ("Use texture", useTex);
 			if (EditorGUI.EndChangeCheck()) {
-				string[] keywords = new string[] { noTex ? "NO_TEX" : "USE_TEX" };
+				string[] keywords = new string[] { useTex ? "USE_TEX" : "NO_TEX" };
 				targetMat.shaderKeywords = keywords;
 				EditorUtility.SetDirty (targetMat);
 			}
